@@ -1,10 +1,11 @@
 # Frontend Coding guidelines
 
 - [Frontend Coding guidelines](#frontend-coding-guidelines)
-  - [Basic](#basic)
+  - [refs](#refs)
   - [Code Format](#code-format)
-  - [Naming](#naming)
+  - [i18n](#i18n)
   - [CSS](#css)
+    - [classNames](#classnames)
   - [Testing](#testing)
     - [Must](#must)
       - [1. the logic code is nested.](#1-the-logic-code-is-nested)
@@ -12,15 +13,27 @@
       - [user-event](#user-event)
       - [custom render](#custom-render)
   - [Form](#form)
-  - [React](#react)
-    - [1. Write children in Props if it is necessary, Don't use `React.FC`.](#1-write-children-in-props-if-it-is-necessary-dont-use-reactfc)
-    - [2. Primary handle functions should not be optional](#2-primary-handle-functions-should-not-be-optional)
-    - [3. useEffect tip: don't](#3-useeffect-tip-dont)
   - [File Structure](#file-structure)
-  - [i18n](#i18n)
+  - [SVG](#svg)
+  - [React](#react)
+    - [Write children in Props if it is necessary, Don't use `React.FC`.](#write-children-in-props-if-it-is-necessary-dont-use-reactfc)
+    - [Primary handle functions should not be optional](#primary-handle-functions-should-not-be-optional)
+    - [useEffect tip: don't](#useeffect-tip-dont)
+    - [Avoid use spread operator in Component](#avoid-use-spread-operator-in-component)
+    - [use children to pass complex UI](#use-children-to-pass-complex-ui)
+  - [Naming](#naming)
+    - [React props must be camelCase](#react-props-must-be-camelcase)
+    - [Data Sync use suffix `Query` and `Mutation`](#data-sync-use-suffix-query-and-mutation)
+    - [Don't use common name](#dont-use-common-name)
+  - [export and import](#export-and-import)
+  - [Storybook](#storybook)
+  - [UI](#ui)
+    - [Don't throw Error in UI](#dont-throw-error-in-ui)
+    - [Don't ignore or hide or filter user's Data](#dont-ignore-or-hide-or-filter-users-data)
 
-## Basic
+## refs
 
+* file structure: [Redwood File Structure](https://redwoodjs.com/docs/tutorial/chapter1/file-structure)
 * JavaScript Style Guide: [Airbnb JavaScript Style Guide](https://github.com/airbnb/javascript)
 * TypeScript coding guidelines: [jaredpalmer/typescript](https://github.com/jaredpalmer/typescript)
 * [Naming cheatsheet](https://github.com/kettanaito/naming-cheatsheet)
@@ -29,9 +42,9 @@
 
 1. JS file lines limit 400.
 
-## Naming
+## i18n
 
-- Data Sync use suffix `Query` and `Mutation`, like: userQuery, usersQuery, createUserMutation, updateUserMutation.
+* key must lowercase, like: "hello world", "system settings".
 
 ## CSS
 
@@ -39,8 +52,19 @@
     1. Don't construct class names dynamically, Always use complete class names. see [tailwind document](https://tailwindcss.com/docs/content-configuration#dynamic-class-names)
     2. Use unprefixed utilities to target mobile, and override them at larger breakpoints. see [document](https://tailwindcss.com/docs/responsive-design#targeting-mobile-screens)
     3. Extracting classes with @apply is last resort [document](https://tailwindcss.com/docs/reusing-styles#avoiding-premature-abstraction)
+
 2. Don't use SCSS, Less and CSS-in-JS.
 3. Don't use `fontWeight: 500`, because a lot of issues.
+
+### classNames
+
+```js
+// good
+classNames('foo', { bar: true }); // => 'foo bar'
+
+// bad
+classNames('foo',  true && 'bar'); // => 'foo bar'
+```
 
 ## Testing
 
@@ -102,13 +126,30 @@ import { render } from "../../utils/testUtils";
 2. first validation after first submit.
 3. real validation after submit.
 
+## File Structure
+
+- Don’t overthink it.
+- Structure files of changed together.
+
+## SVG
+
+We don't use svg directly, we published a npm.
+
+```
+npm install @sodaicons/react
+```
+
+```
+yarn add @sodaicons/react
+```
+
 ## React
 
-### 1. Write children in Props if it is necessary, Don't use `React.FC`.
+### Write children in Props if it is necessary, Don't use `React.FC`.
 
 https://stackoverflow.com/questions/71788254/react-18-typescript-children-fc/71809927#71809927
 
-### 2. Primary handle functions should not be optional
+### Primary handle functions should not be optional
 
 bad code
 
@@ -132,7 +173,7 @@ type Props = {
 onOk();
 ```
 
-### 3. useEffect tip: don't
+### useEffect tip: don't
 
 bad
 
@@ -146,12 +187,92 @@ good
 TODO:
 ```
 
-## File Structure
+### Avoid use spread operator in Component
 
-- reference [Redwood File Structure](https://redwoodjs.com/docs/tutorial/chapter1/file-structure)
-- Don’t overthink it.
-- Structure files of changed together.
+Good
+```js
+<MemberCard member={member} shadow={true} border={"dashed"} />
+```
 
-## i18n
+Bad
+```js
+const data = { member: {name: "jiang jifa"}, shadow: true, border: "dashed" }
+<MemberCard {...data} />
+```
 
-* key must lowercase, like: "hello world", "system settings".
+### use children to pass complex UI
+
+Good
+
+```diff
+export type ModalProps = {
+  title: string;
+  description?: string;
++  children?: ReactNode;
+```
+
+Bad
+
+```diff
+export type ModalProps = {
+  title: string;
+-  description?: string;
++  description?: ReactNode;
+```
+
+## Naming
+
+### React props must be camelCase
+
+### Data Sync use suffix `Query` and `Mutation`
+
+Example:
+```
+userQuery
+usersQuery
+createUserMutation
+updateUserMutation
+```
+
+### Don't use common name
+
+Good
+```js
+FormWrapper
+
+QueryWrapper
+
+I18nWrapper
+```
+
+Bad
+```js
+Wrapper
+```
+
+## export and import
+
+1. Do not use `export` to declare interfaces, usually you can use it directly in the component without the `import` interface
+
+2. use `export default` to export the components you need directly
+
+3. Importing components or dependencies using `import` only
+
+## Storybook
+
+1. All Figma page should have stories.
+2. Common loading UI and common failure are useless.
+3. Responsive Design: SmartPhone, Tablet, PC and big screen.
+
+## UI
+
+### Don't throw Error in UI
+
+- UI shouldn't crash.
+
+You can use `ErrorBoundary` or `Error Component`.
+
+### Don't ignore or hide or filter user's Data
+
+Even user's data is invalid, show some message, don't hide.
+We don't deal user's data.
